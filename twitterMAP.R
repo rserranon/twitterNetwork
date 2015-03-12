@@ -44,7 +44,7 @@
 ########################################################################################
 getPckg <- function(pckg) install.packages(pckg, repos = "http://cran.r-project.org")
 
-seaColor <- colors()[30]
+seaColor <- colors()[477]
 
 pckg = try(require(twitteR))
 if(!pckg) {
@@ -81,36 +81,63 @@ twitterMap <- function(userName,userLocation=NULL,fileName=paste("twitterMap_",u
   # Load the geographic data
   data(world.cities)
   data(us.cities)
-  data(canada.cities)	  
+  data(canada.cities)
+  
+  # DEBUG
+  cat(paste("DEBUG  *** userLocation from function -> ",str(userLocation), " \n"))	  
   
   # Get location data
-  cat("Getting data from Twitter, this may take a moment.\n")
+  cat("Getting data from Twitter, this may take a moment. \n")
+  
   tmp = getUser(userName)
+  cat(paste("DEBUG  *** class(getUser(userName)) -> ",class(tmp), " \n"))
+  
   if(is.null(userLocation)){
+    cat("DEBUG  *** userLocation == NULL \n")
+     
     userLocation = location(tmp)
     userLocation = trim(userLocation)
-    if(nchar(userLocation) < 2){
+    
+    cat(paste("DEBUG  *** location(tmp) -> ",str(userLocation), " \n"))
+    cat(paste("DEBUG  *** trim(userLocation) -> ",str(userLocation), " \n"))
+    
+    
+   } else
+   {   
+    if(length(grep("userLocation",world.cities[,1])) == 0) {
+      # DEBUG
+      cat("DEBUG  *** length(userLocation) == 0 \n")
+    
       userLocation <- "Mexico City"
+      cat(paste("DEBUG  *** Now it's ", userLocation, " \n"))
       # Not needed anymore -> stop("We can not find your location from Twitter")
     }
   }
   
+  # Find the latitude and longitude of the user
+  cat("Getting geographic (latitude/longitude) of Twitter users. \n \n")
+  
+  userLL = findLatLon(userLocation)$latlon
+  
   # DEBUG
-  paste("userLocation -> ",cat(userLocation))
+  cat(paste("DEBUG 5 *** userLL -> ",str(userLL), "\n"))
+  cat(paste("DEBUG 6 *** class(userLL) -> ",class(userLL), "\n"))
+  cat(paste("DEBUG 7 *** names(userLL) -> ",names(userLL), "\n"))
+    
+  if(any(is.na(userLL))){
+  	stop("We can't find the latitude and longitude of your location from Twitter")
+  }
   
   followers=tmp$getFollowers(n=nMax)
   followersLocation = sapply(followers,function(x){location(x)})
   following = tmp$getFriends(n=nMax)
   followingLocation = sapply(following,function(x){location(x)})
   
-  # Find the latitude and longitude of the user
-  cat("Getting geographic (latitude/longitude) of Twitter users.\n")
-  userLL <- findLatLon(userLocation)$latlon
-  if(any(is.na(userLL))){stop("We can't find the latitude and longitude of your location from Twitter")}
+  
   
   
   # DEBUG
-  paste("userLL -> ",cat(str(userLL)))
+  cat(paste("DEBUG *** userLL -> ",cat(str(userLL), "\n")))
   
   # Find the latitude and longitude of each of the followers/following
   # and calcualte the distance to the user
@@ -149,7 +176,7 @@ twitterMap <- function(userName,userLocation=NULL,fileName=paste("twitterMap_",u
   
   # Both followers and following
   if(plotType=="both"){
-    pdf(fileName,height=12,width=10)
+    #pdf(fileName,height=12,width=10)
     data(worldMapEnv)
     par(mfrow=c(2,1),mar=rep(0,4))
     map('world',col="#191919",bg=seaColor,fill=T,mar=rep(0,4),border=0)
@@ -180,7 +207,7 @@ twitterMap <- function(userName,userLocation=NULL,fileName=paste("twitterMap_",u
   
   ## Just followers
   if(plotType=="followers"){
-    pdf(fileName,height=6,width=10)
+    #pdf(fileName,height=6,width=10)
     data(worldMapEnv)
     map('world',col="#191919",bg=seaColor,fill=T,mar=rep(0,4),border=0)
     
@@ -199,7 +226,7 @@ twitterMap <- function(userName,userLocation=NULL,fileName=paste("twitterMap_",u
   
   ## Just following
   if(plotType=="following"){
-    pdf(fileName,height=6,width=10)
+    #pdf(fileName,height=6,width=10)
     data(worldMapEnv)
     map('world',col="#191919",bg=seaColor,fill=T,mar=rep(0,4),border=0)
     mtext(paste("@",userName," Following Map",sep=""),col="lightgrey")
@@ -212,7 +239,7 @@ twitterMap <- function(userName,userLocation=NULL,fileName=paste("twitterMap_",u
     legend(-180,0,legend = c(paste("Asia",sum(followingLL[,4]==1)),paste("Africa",sum(followingLL[,4]==2)),paste("N. America",sum(followingLL[,4]==3)),paste("S. America",sum(followingLL[,4]==4)),paste("Australia/N.Z.",sum(followingLL[,4]==5)),paste("Europe",sum(followingLL[,4]==6))),text.col=cols[1:6],bg="black",cex=0.75)
     
     mtext("Created by @StartupsPal based on GNU version of @simplystats twitterMap",side=1,adj=1,cex=0.8,col="grey")
-    dev.off()
+    #dev.off()
     
   }
   
@@ -253,8 +280,8 @@ findLatLon <- function(loc){
   
   
   # Get the first element of the location
-  # firstElement = strsplit(loc,"[^[:alnum:]]")[[1]][1]
-  firstElement = strsplit(loc,",")[[1]][1]
+  firstElement = strsplit(loc,"[^[:alnum:]]")[[1]][1]
+  #firstElement = strsplit(loc,",")[[1]][1]
   if(is.na(firstElement)){firstElement="zzzzzzzzz"}
   
   # See if it is a city

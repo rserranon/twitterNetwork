@@ -10,7 +10,7 @@ library(shiny)
 shinyUI(fluidPage(
 
   # Application title
-  titlePanel("Old Faithful Geyser Data"),
+  titlePanel("Conoces tu red de Twitter"),
 
   # Sidebar with a slider input for number of bins
   sidebarLayout(
@@ -26,7 +26,9 @@ shinyUI(fluidPage(
                   "Numero de followers:",
                   min = 1,
                   max = 5000,
-                  value = 100)
+                  value = 1000),
+      
+      actionButton("goButton", "Go!")
     ),
 
     # Show a plot of the generated distribution
